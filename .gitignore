@@ -21,3 +21,6 @@ pjpd/
 
 # uv
 .python-version
+
+.claude
+.cursor
