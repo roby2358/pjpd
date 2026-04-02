@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+
+# Testing / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# IDE
+.idea/
+
+# pjpd data (local project data, not part of the source)
+pjpd/
+
+# uv
+.python-version
