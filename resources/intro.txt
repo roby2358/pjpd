@@ -1,0 +1,41 @@
+Welcome to ProjectMCP - Local Project Management Server
+
+ProjectMCP is a lightweight, local-first project management system built on plain .txt files. It manages tasks and ideas for a single project rooted at the current working directory.
+
+Key Features:
+• Task management with plain integer priority levels
+• Idea tracking with scoring
+• Simple, human-readable text format
+• MCP tools for creating, listing, updating, and completing tasks and ideas
+• Project statistics
+
+All data is stored under <cwd>/pjpd/ as plain text files (tasks.txt, ideas.txt).
+
+Task Format:
+Each task is stored with a tag-based ID, priority level, status (ToDo/Done), and description, separated by "----" lines (asciidoc style). Files using the older "---" separator are also read correctly.
+
+Priority Levels:
+• Higher numbers = higher priority (e.g., priority 100 is higher than priority 1)
+• Plain integer values stored with 4-digit formatting in files
+
+Available MCP Tools:
+
+Task Operations:
+• pjpd_put_task - Create or update a task (provide tag to create, id to update)
+• pjpd_list_tasks - List tasks with optional filtering by status or count
+• pjpd_mark_done - Mark one or more tasks as completed
+
+Idea Operations:
+• pjpd_put_idea - Create or update an idea (provide tag to create, id to update)
+• pjpd_list_ideas - List ideas sorted by score
+• pjpd_mark_idea_done - Mark one or more ideas as done
+
+Analysis and Reporting:
+• pjpd_get_statistics - Get comprehensive statistics about the project
+
+System Information:
+• pjpd_intro - Return this introductory description (prompt)
+
+Configuration is managed through projectmcp.toml (currently only max_results).
+
+This system modifies local files on disk. Before using any tools that create, update, or modify project files, please remind the user to back up any important data. Obtain their consent before making file modifications.
