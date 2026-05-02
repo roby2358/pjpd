@@ -62,7 +62,6 @@ Using an MCP client (like Claude Desktop or Claude Code), you can:
 - "Show me completed tasks too"
 - "Mark tasks 'dev-a2c4' and 'bug-x3y5' as completed"
 - "Bump 'dev-a2c4' to priority 90"
-- "Show me project statistics"
 
 **Idea Management:**
 - "Add a new idea: 'Implement dark mode' with score 80 and tag 'ui'"
@@ -178,11 +177,6 @@ For complete API documentation including all MCP tools and prompts, see [README_
 5. **Mark tasks complete** (all-or-nothing):
    ```
    pjpd_mark_task_done(task_ids=["design-ab12", "form-cd34"])
-   ```
-
-6. **Project statistics:**
-   ```
-   pjpd_get_statistics()
    ```
 
 ### Idea Management

@@ -4,7 +4,6 @@ Manages a single project backed by pjpd/tasks.txt in the working directory.
 """
 
 import logging
-from collections import defaultdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -108,18 +107,3 @@ class Projects:
         overview["project_file"] = str(self.tasks_file)
         return overview
 
-    def get_statistics(self) -> Dict[str, Any]:
-        """Get detailed statistics about the project."""
-        tasks = self.project.tasks
-        stats: Dict[str, Any] = {
-            "total_tasks": len(tasks),
-            "tasks_by_priority": defaultdict(int),
-            "tasks_by_status": defaultdict(int),
-            "project_file": str(self.tasks_file),
-        }
-
-        for task in tasks:
-            stats["tasks_by_priority"][task.priority] += 1
-            stats["tasks_by_status"][task.status] += 1
-
-        return dict(stats)

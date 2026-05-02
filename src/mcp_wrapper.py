@@ -282,27 +282,6 @@ async def pjpd_reprioritize_task(priority: int, task_ids: List[str]) -> Dict[str
         )
 
 
-@mcp.tool()
-async def pjpd_get_statistics() -> Dict[str, Any]:
-    """Get comprehensive statistics about the project.
-
-    Returns:
-        Standard MCP response with detailed statistics including total counts,
-        breakdowns by priority and status.
-    """
-    try:
-        stats = projects_manager.get_statistics()
-
-        return mcp_success(
-            _add_legacy_warning({
-                **stats,
-                "message": f"Retrieved statistics: {stats['total_tasks']} total tasks",
-            })
-        )
-    except Exception as e:
-        return mcp_failure(f"Error getting statistics: {str(e)}")
-
-
 # ---------------------------------------------------------------------------
 # Idea tools
 # ---------------------------------------------------------------------------
