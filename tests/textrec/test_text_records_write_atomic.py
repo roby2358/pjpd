@@ -63,10 +63,18 @@ def test_write_atomic_creates_file_when_nonexistent(text_file_nonexistent: Path)
     assert text_file_nonexistent.exists()
     assert text_file_nonexistent.read_text(encoding="utf-8") == new_content
 
-    # Ensure the `bak` directory exists
+    # No bak directory should be created when there was nothing to back up
     bak_dir = text_file_nonexistent.parent / "bak"
-    assert bak_dir.is_dir(), "bak directory was not created"
+    assert not bak_dir.exists()
 
-    # There should be no backup files since the original file didn't exist
-    bak_files = list(bak_dir.iterdir())
-    assert len(bak_files) == 0, "Expected no backup files when original file didn't exist" 
+
+def test_write_atomic_no_backup_overwrites_without_archive(text_file: Path) -> None:
+    """write_atomic_no_backup should overwrite the file without creating a backup."""
+    text_records = TextRecords(text_file.parent)
+
+    text_records.write_atomic_no_backup(text_file, "updated content")
+
+    assert text_file.read_text(encoding="utf-8") == "updated content"
+
+    bak_dir = text_file.parent / "bak"
+    assert not bak_dir.exists()

@@ -22,11 +22,12 @@ class Projects:
     def __init__(self, project_dir: Path | str):
         self.project_dir = Path(project_dir).expanduser()
         self.tasks_file = self.project_dir / "pjpd" / "tasks.txt"
+        self.done_tasks_file = self.project_dir / "pjpd" / "tasks_done.txt"
         self._project: Optional[Project] = None
 
     @property
     def project_file(self) -> Path:
-        """Full path to the project tasks file."""
+        """Full path to the project tasks file (todo tasks)."""
         return self.tasks_file
 
     def legacy_project_file_warning(self) -> Optional[str]:
@@ -59,7 +60,11 @@ class Projects:
 
     def _load_project(self) -> Project:
         """Load (or reload) the project from disk."""
-        self._project = Project(name="tasks", file_path=self.tasks_file)
+        self._project = Project(
+            name="tasks",
+            file_path=self.tasks_file,
+            done_file_path=self.done_tasks_file,
+        )
         return self._project
 
     @property

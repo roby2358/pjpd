@@ -35,21 +35,16 @@ class Ideas:
 
     def _load_ideas(self) -> None:
         """Load ideas from `ideas.txt` (lazily)."""
-        if not self.present:
-            self._ideas = []
-            return
-            
-        if not self.ideas_file.exists():
+        if not self.present or not self.ideas_file.exists():
             self._ideas = []
             return
 
         try:
-            records = self.text_records.parse_file(self.ideas_file)
-            loaded: list[Idea] = []
-            for record in records:
-                idea = Idea.from_text(record["text"])
-                if idea:
-                    loaded.append(idea)
+            loaded = [
+                idea
+                for record_text in self.text_records.read_records(self.ideas_file)
+                if (idea := Idea.from_text(record_text)) is not None
+            ]
             # Sort: active ideas first, then done; within each group by score desc
             loaded.sort(key=lambda i: (i.is_done, -i.score))
             self._ideas = loaded
@@ -67,7 +62,7 @@ class Ideas:
 
         # Sort: active ideas first, then done; within each group by score desc
         sorted_ideas = sorted(self._ideas, key=lambda i: (i.is_done, -i.score))
-        content = "\n----\n".join(idea.to_text() for idea in sorted_ideas)
+        content = self.text_records.join_records(idea.to_text() for idea in sorted_ideas)
 
         self.text_records.write_atomic(self.ideas_file, content)
 

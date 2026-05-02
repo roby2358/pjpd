@@ -29,7 +29,7 @@ python pjpd.py                       # Run the MCP server
 **Single-project model**: The cwd is the project. There is one `pjpd/tasks.txt` file — no named projects, no project parameter on task tools.
 
 **Two domain modules** follow the same pattern:
-- `src/projects/` — `Projects` manages a single `Project` instance backed by `pjpd/tasks.txt`. Each `Task` is lazy-loaded from the file.
+- `src/projects/` — `Projects` manages a single `Project` instance backed by `pjpd/tasks.txt` (ToDo) and `pjpd/tasks_done.txt` (Done). Each `Task` is lazy-loaded from the files.
 - `src/ideas/` — `Ideas` manages `Idea` records in `pjpd/ideas.txt`.
 
 **Shared infrastructure**:
@@ -40,7 +40,8 @@ python pjpd.py                       # Run the MCP server
 **Storage layout on disk**:
 ```
 <cwd>/pjpd/
-├── tasks.txt         # All tasks for the project
+├── tasks.txt         # ToDo tasks for the project
+├── tasks_done.txt    # Done tasks (archive; not backed up to bak/)
 ├── ideas.txt         # All ideas
 └── bak/              # Timestamped backups from atomic writes
 ```

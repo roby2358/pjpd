@@ -5,8 +5,7 @@ Represents a single project with its tasks stored in a text file
 
 import logging
 from pathlib import Path
-import uuid
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 from textrec.text_records import TextRecords
 from .task import Task
@@ -14,39 +13,36 @@ from .task import Task
 logger = logging.getLogger(__name__)
 
 class Project:
-    """Represents a single project with its tasks"""
-    
-    def __init__(self, name: str, file_path: Path):
+    """Represents a single project with its tasks.
+
+    ToDo tasks are stored in ``file_path`` (e.g. ``pjpd/tasks.txt``) and Done
+    tasks are stored in ``done_file_path`` (e.g. ``pjpd/tasks_done.txt``).
+    The done file is written without a ``bak/`` backup since it acts as an
+    archive that grows over time.
+    """
+
+    def __init__(self, name: str, file_path: Path, done_file_path: Path):
         self.name = name
         self.file_path = Path(file_path)
+        self.done_file_path = Path(done_file_path)
         self.text_records = TextRecords(self.file_path.parent)
         self._tasks: Optional[List[Task]] = None
-        
+
     @property
     def tasks(self) -> List[Task]:
         """Get all tasks in this project, loading from file if needed"""
         if self._tasks is None:
             self._load_tasks()
         return self._tasks
-    
+
     def _load_tasks(self) -> None:
-        """Load tasks from the project file"""
-        if not self.file_path.exists():
-            self._tasks = []
-            return
-            
-        try:
-            records = self.text_records.parse_file(self.file_path)
-            self._tasks = []
-            
-            for record in records:
-                task = Task.from_text(record["text"])
-                if task:
-                    self._tasks.append(task)
-                    
-        except Exception as e:
-            logger.error(f"Error loading tasks for project {self.name}: {e}")
-            self._tasks = []
+        """Load tasks from both the todo and done project files."""
+        self._tasks = [
+            task
+            for path in (self.file_path, self.done_file_path)
+            for record_text in self.text_records.read_records(path)
+            if (task := Task.from_text(record_text)) is not None
+        ]
     
     def add_task(self, description: str, priority: int, tag: str) -> Task:
         """Add a new task to this project"""
@@ -94,21 +90,19 @@ class Project:
         return self.update_task(task_id, description=None, priority=None, status="Done")
     
     def _save_tasks(self) -> None:
-        """Save tasks to the project file"""
+        """Save todo tasks to ``file_path`` (with backup) and done tasks to ``done_file_path`` (no backup)."""
         try:
-            # Sort: ToDo before Done, then priority descending
-            status_rank = {"ToDo": 0, "Done": 1}
-            sorted_tasks = sorted(self.tasks, key=lambda task: (status_rank.get(task.status, 2), -task.priority))
-            
-            # Convert tasks to text format
-            task_texts = [task.to_text() for task in sorted_tasks]
-            
-            # Join with ---- separators (asciidoc standard)
-            content = '\n----\n'.join(task_texts)
-            
-            # Always write the content, even if empty (for empty projects)
-            self.text_records.write_atomic(self.file_path, content)
-                
+            by_priority = lambda t: -t.priority
+            todo_tasks = sorted((t for t in self.tasks if t.status != "Done"), key=by_priority)
+            done_tasks = sorted((t for t in self.tasks if t.status == "Done"), key=by_priority)
+
+            todo_content = self.text_records.join_records(t.to_text() for t in todo_tasks)
+            self.text_records.write_atomic(self.file_path, todo_content)
+
+            if done_tasks or self.done_file_path.exists():
+                done_content = self.text_records.join_records(t.to_text() for t in done_tasks)
+                self.text_records.write_atomic_no_backup(self.done_file_path, done_content)
+
         except Exception as e:
             logger.error(f"Error saving tasks for project {self.name}: {e}")
             raise
