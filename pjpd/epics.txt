@@ -1,0 +1,5 @@
+Score:   75
+Ideas: reorganize-bsix
+Projects: pjpd
+ID: pjpd-epic-m334
+Project reorganization and file structure improvements
