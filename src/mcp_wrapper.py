@@ -141,8 +141,8 @@ async def pjpd_put_task(
     """Create or update a task. Provide `tag` to create a new task, or `id` to update an existing one.
 
     Args:
-        description: What needs to be done, in enough detail to act on without additional context.
-        tag: Tag string (1-12 characters, alphanumeric and hyphens only). Provide to create a new task.
+        description: What needs to be done, in enough detail to act on without additional context. Self-contained: do not reference other task IDs.
+        tag: Tag string (1-12 characters, alphanumeric and hyphens only). Provide to create a new task. Must describe the task itself (e.g. "oplock", "gitsemantics"), NEVER the project name — tasks already live inside a project, and the tag makes the task ID self-describing.
         id: Existing task ID (format: `<tag>-XXXX`). Provide to update an existing task.
         priority: Priority from 0 (negligible) to 100 (urgent). Values outside this range are allowed for exceptional cases. Defaults to 50.
 
@@ -325,7 +325,7 @@ async def pjpd_put_idea(
     Args:
         score: Relevance score from 0 (trivial) to 100 (critical). Values outside this range are allowed for exceptional cases.
         description: What the idea entails, in enough detail for a human or model to understand its purpose and scope.
-        tag: Tag string (1-12 characters, alphanumeric and hyphens only). Provide to create a new idea.
+        tag: Tag string (1-12 characters, alphanumeric and hyphens only). Provide to create a new idea. Must describe the idea itself, NEVER the project name — ideas already live inside a project, and the tag makes the idea ID self-describing.
         id: Existing idea ID (format: `<tag>-XXXX`). Provide to update an existing idea.
 
     Returns:
