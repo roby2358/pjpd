@@ -111,7 +111,7 @@ pub struct TaskPatch {
 impl TaskPatch {
     fn apply_to(&self, task: &mut Task) {
         if let Some(description) = &self.description {
-            task.description = description.clone();
+            task.description = textrec::indent_separator_lines(description);
         }
         if let Some(priority) = self.priority {
             task.priority = priority;
@@ -196,7 +196,7 @@ impl TaskStore {
             tag: tag.to_string(),
             priority,
             status: STATUS_TODO.to_string(),
-            description: description.to_string(),
+            description: textrec::indent_separator_lines(description),
             created: None,
             updated: None,
         };

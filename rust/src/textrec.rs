@@ -46,6 +46,23 @@ fn push_trimmed(records: &mut Vec<String>, text: &str) {
     }
 }
 
+/// Indent any line that would read back as a record separator, so a hyphen
+/// rule inside a description can't split its record on reload. Write-side
+/// only, applied when a description enters a store: the indented form is the
+/// stored form — nothing is unescaped on read.
+pub fn indent_separator_lines(text: &str) -> String {
+    text.lines()
+        .map(|line| {
+            if is_separator_line(line) {
+                format!("  {line}")
+            } else {
+                line.to_string()
+            }
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
 /// Join already-formatted record texts with the canonical record separator.
 pub fn join_records<I>(record_texts: I) -> String
 where
@@ -136,6 +153,24 @@ mod tests {
     #[test]
     fn drops_empty_records() {
         assert_eq!(split_records("----\n\n----\nx\n----"), vec!["x"]);
+    }
+
+    #[test]
+    fn indent_separator_lines_defuses_only_separator_shaped_lines() {
+        assert_eq!(
+            indent_separator_lines("intro\n---\n----   \noutro"),
+            "intro\n  ---\n  ----   \noutro"
+        );
+        // Not separators: text after the hyphens, existing indent, too short.
+        assert_eq!(
+            indent_separator_lines("--- text\n  ---\n--"),
+            "--- text\n  ---\n--"
+        );
+        // An indented line survives a second pass unchanged.
+        assert_eq!(
+            indent_separator_lines(&indent_separator_lines("---")),
+            "  ---"
+        );
     }
 
     #[test]

@@ -1,10 +1,3 @@
-Priority:   70
-Status: ToDo
-ID: hrescape-3utd
-Created: 2026-08-13T21:07:15Z
-Updated: 2026-08-13T21:07:15Z
-Escape or guard description lines consisting of three or more hyphens when writing records to disk, so a markdown horizontal rule inside a description no longer splits the record in two on reload. Today the split-off fragment has no id and is assigned a fresh random legacy id on every load, producing ghost tasks whose ids change between listings. Decide the escaping scheme (indent, prefix, or quote) and keep the reader backward compatible with existing files.
-----
 Priority:   40
 Status: ToDo
 ID: legacyid-5s5w

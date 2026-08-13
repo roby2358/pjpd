@@ -14,6 +14,51 @@ fn done_patch() -> TaskPatch {
 }
 
 #[test]
+fn separator_lines_in_task_descriptions_are_indented_on_add() {
+    let dir = TempDir::new().unwrap();
+    let store = TaskStore::new(dir.path());
+
+    let task = store.add("intro\n---\noutro", 5, "rule").unwrap();
+    assert_eq!(task.description, "intro\n  ---\noutro");
+
+    let loaded = store.load();
+    assert_eq!(loaded.len(), 1);
+    assert_eq!(loaded[0].description, "intro\n  ---\noutro");
+}
+
+#[test]
+fn separator_lines_in_task_descriptions_are_indented_on_update() {
+    let dir = TempDir::new().unwrap();
+    let store = TaskStore::new(dir.path());
+
+    let task = store.add("plain", 5, "rule").unwrap();
+    let patch = TaskPatch {
+        description: Some("before\n----\nafter".to_string()),
+        priority: None,
+        status: None,
+    };
+    let updated = store.update(&task.id, &patch).unwrap().unwrap();
+    assert_eq!(updated.description, "before\n  ----\nafter");
+    assert_eq!(store.load().len(), 1);
+}
+
+#[test]
+fn separator_lines_in_idea_descriptions_are_indented() {
+    let dir = TempDir::new().unwrap();
+    let store = IdeaStore::new(dir.path());
+
+    let idea = store.add("top\n---\nbottom", 5, "rule").unwrap();
+    assert_eq!(idea.description, "top\n  ---\nbottom");
+
+    let updated = store
+        .update(&idea.id, "one\n-----\ntwo", 7)
+        .unwrap()
+        .unwrap();
+    assert_eq!(updated.description, "one\n  -----\ntwo");
+    assert_eq!(store.load().len(), 1);
+}
+
+#[test]
 fn write_atomic_archives_previous_version() {
     let dir = TempDir::new().unwrap();
     let file = dir.path().join("data.txt");

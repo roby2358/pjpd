@@ -124,7 +124,7 @@ impl IdeaStore {
             id: ids::generate_with_tag(tag)?,
             tag: tag.to_string(),
             score,
-            description: description.to_string(),
+            description: textrec::indent_separator_lines(description),
             created: None,
             updated: None,
         };
@@ -150,7 +150,7 @@ impl IdeaStore {
             return Ok(None);
         };
 
-        idea.description = description.to_string();
+        idea.description = textrec::indent_separator_lines(description);
         idea.score = score;
         idea.stamp();
 

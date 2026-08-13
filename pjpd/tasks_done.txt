@@ -12,6 +12,13 @@ Created: 2026-08-13T21:07:09Z
 Updated: 2026-08-13T23:05:40Z
 Parse record properties only from the leading run of property lines, treating everything after the first non-property line as description. Currently every line of a record is scanned for key-value patterns, so description text that happens to contain a status or id line overrides the record's real header fields on reload (later duplicate wins), letting a task silently rename itself, complete itself, or change priority. Fixing this changes the parse side of the on-disk contract; update the parser tests that pin it.
 ----
+Priority:   70
+Status: Done
+ID: hrescape-3utd
+Created: 2026-08-13T21:07:15Z
+Updated: 2026-08-13T23:30:34Z
+Escape or guard description lines consisting of three or more hyphens when writing records to disk, so a markdown horizontal rule inside a description no longer splits the record in two on reload. Today the split-off fragment has no id and is assigned a fresh random legacy id on every load, producing ghost tasks whose ids change between listings. Decide the escaping scheme (indent, prefix, or quote) and keep the reader backward compatible with existing files.
+----
 Priority:    0
 Status: Done
 ID: timestamps-q2jp
