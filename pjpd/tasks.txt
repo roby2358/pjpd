@@ -12,6 +12,20 @@ Created: 2026-08-13T21:07:15Z
 Updated: 2026-08-13T21:07:15Z
 Escape or guard description lines consisting of three or more hyphens when writing records to disk, so a markdown horizontal rule inside a description no longer splits the record in two on reload. Today the split-off fragment has no id and is assigned a fresh random legacy id on every load, producing ghost tasks whose ids change between listings. Decide the escaping scheme (indent, prefix, or quote) and keep the reader backward compatible with existing files.
 ----
+Priority:   40
+Status: ToDo
+ID: legacyid-5s5w
+Created: 2026-08-13T22:38:03Z
+Updated: 2026-08-13T22:38:03Z
+When saving a record whose ID is in the legacy XX-XXXX-XX form (produced by the parser's salvage fallback), rewrite it to a valid tag-based ID so the record becomes addressable by the tools again. No need to preserve the old ID or leave a link; nothing external references these IDs yet. Applies to both task and idea stores.
+----
+Priority:   35
+Status: ToDo
+ID: donecase-xxcv
+Created: 2026-08-13T22:38:05Z
+Updated: 2026-08-13T22:38:05Z
+Make status comparisons consistent and case-insensitive: Task is_done does an exact match against "Done" while the default list filter compares case-insensitively against "todo", so a hand-edited status like "done" is neither listed nor archived. Use one case-insensitive comparison rule everywhere status is checked.
+----
 Priority:   30
 Status: ToDo
 ID: intoverflow-dsee

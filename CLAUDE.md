@@ -52,6 +52,7 @@ Run the server by executing `rust/target/release/pjpd` with the project root as 
 - **CWD is the project root** — no configurable projects directory, no multi-project support.
 - **The on-disk text formats are the cross-language contract** — record separators (`----`), `Priority:`/`Score:` values padded to width 4, property lines in any order, ID pattern `^[a-zA-Z0-9\-]+-[a-z2-9]{4}$`, sort orders. Any future port must preserve them; the test suite pins them.
 - **Priority is a plain integer** (higher = more important). New tasks default to priority 50 when none is given; updates without a priority preserve the existing one.
+- **Priority (tasks) and score (ideas) are deliberately distinct concepts**, not one value under two names. Score measures how promising an idea is; priority measures how urgently a task needs doing, and the second only exists once there's commitment to act. Ideas just are — prioritization happens when something graduates into a task. Don't unify the two fields or their vocabulary.
 - **Marking done**: Tasks get status "Done" and move to tasks_done.txt. Ideas get a "(Done)" prefix; their score is preserved so it stays visible off the books.
 - **Every tool response includes `project_file`** — the full path to the file being operated on.
 - **Legacy migration warning** — task tool responses include a `warning` property if `pjpd/<dir_name>.txt` exists (from the old multi-project layout).
