@@ -1,0 +1,27 @@
+Priority:   80
+Status: ToDo
+ID: headerparse-z7xw
+Created: 2026-08-13T21:07:09Z
+Updated: 2026-08-13T21:07:09Z
+Parse record properties only from the leading run of property lines, treating everything after the first non-property line as description. Currently every line of a record is scanned for key-value patterns, so description text that happens to contain a status or id line overrides the record's real header fields on reload (later duplicate wins), letting a task silently rename itself, complete itself, or change priority. Fixing this changes the parse side of the on-disk contract; update the parser tests that pin it.
+----
+Priority:   70
+Status: ToDo
+ID: hrescape-3utd
+Created: 2026-08-13T21:07:15Z
+Updated: 2026-08-13T21:07:15Z
+Escape or guard description lines consisting of three or more hyphens when writing records to disk, so a markdown horizontal rule inside a description no longer splits the record in two on reload. Today the split-off fragment has no id and is assigned a fresh random legacy id on every load, producing ghost tasks whose ids change between listings. Decide the escaping scheme (indent, prefix, or quote) and keep the reader backward compatible with existing files.
+----
+Priority:   30
+Status: ToDo
+ID: intoverflow-dsee
+Created: 2026-08-13T21:07:24Z
+Updated: 2026-08-13T21:07:24Z
+Preserve oversized numeric values in Priority and Score lines when loading hand-edited files. The parser consumes any all-digit value but silently substitutes the default when it exceeds 64-bit integer range, losing the original value with no trace; the retired Python implementation preserved arbitrary precision integers. Either leave the unparseable line in the description or clamp with a logged warning.
+----
+Priority:   20
+Status: ToDo
+ID: schemabounds-gyk3
+Created: 2026-08-13T21:07:30Z
+Updated: 2026-08-13T21:07:30Z
+Add numeric range and string length bounds to the MCP parameter JSON schemas via schemars attributes, for example range 0 to 9999 on priority and score, 1 to 1000 on count, and length 1 to 12 on tag. Runtime validation already enforces these rules; the generated schema stopped advertising them after the Rust port, so calling models get less machine-readable guidance than the old Pydantic schemas provided.
