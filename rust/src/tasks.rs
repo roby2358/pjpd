@@ -8,7 +8,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{Map, Value, json};
 
-use crate::record::{parse_record, resolve_id, stamp, tag_from_id};
+use crate::record::{parse_record, push_description, resolve_id, stamp, tag_from_id};
 use crate::{ids, textrec};
 
 pub const STATUS_TODO: &str = "ToDo";
@@ -26,9 +26,10 @@ pub struct Task {
 }
 
 impl Task {
-    /// Parse a task from record text: property lines (`Priority:`, `Status:`,
-    /// `ID:`, `Tag:`, `Created:`, `Updated:`) in any order, all remaining lines
-    /// forming the description. Returns None only when a missing ID cannot be
+    /// Parse a task from record text: a leading run of property lines
+    /// (`Priority:`, `Status:`, `ID:`, `Tag:`, `Created:`, `Updated:`) in any
+    /// order, with everything from the first non-property line onward forming
+    /// the description. Returns None only when a missing ID cannot be
     /// regenerated from an invalid tag.
     pub fn from_text(text: &str) -> Option<Task> {
         let parsed = parse_record(
@@ -64,7 +65,8 @@ impl Task {
         stamp(&mut self.created, &mut self.updated);
     }
 
-    /// Render back to on-disk record form (each property on its own line).
+    /// Render back to on-disk record form: each property on its own line,
+    /// then a blank line, then the description.
     pub fn to_text(&self) -> String {
         let mut lines = vec![
             format!("Priority: {:4}", self.priority),
@@ -77,7 +79,7 @@ impl Task {
         if let Some(updated) = &self.updated {
             lines.push(format!("Updated: {updated}"));
         }
-        lines.push(self.description.trim().to_string());
+        push_description(&mut lines, &self.description);
         lines.join("\n")
     }
 
@@ -256,9 +258,25 @@ mod tests {
 
     #[test]
     fn non_digit_priority_line_becomes_description() {
-        let task = Task::from_text("Priority: high\nID: t-ab12\nreal text").unwrap();
+        let task = Task::from_text("ID: t-ab12\nPriority: high\nreal text").unwrap();
+        assert_eq!(task.id, "t-ab12");
         assert_eq!(task.priority, 1);
         assert_eq!(task.description, "Priority: high\nreal text");
+    }
+
+    #[test]
+    fn property_lines_inside_description_do_not_override_header() {
+        let task = Task::from_text(
+            "Priority:   80\nStatus: ToDo\nID: real-ab12\nSteps to close out:\nStatus: Done\nID: fake-zz99\nPriority: 1",
+        )
+        .unwrap();
+        assert_eq!(task.id, "real-ab12");
+        assert_eq!(task.status, "ToDo");
+        assert_eq!(task.priority, 80);
+        assert_eq!(
+            task.description,
+            "Steps to close out:\nStatus: Done\nID: fake-zz99\nPriority: 1"
+        );
     }
 
     #[test]
@@ -278,14 +296,24 @@ mod tests {
     }
 
     #[test]
-    fn to_text_pads_priority_to_width_four() {
+    fn to_text_pads_priority_and_separates_description_with_blank_line() {
         let mut task = Task::from_text("Priority: 5\nID: t-ab12\nx").unwrap();
         task.created = None;
         task.updated = None;
         assert_eq!(
             task.to_text(),
-            "Priority:    5\nStatus: ToDo\nID: t-ab12\nx"
+            "Priority:    5\nStatus: ToDo\nID: t-ab12\n\nx"
         );
+    }
+
+    #[test]
+    fn property_shaped_description_survives_write_and_reload() {
+        let mut task = Task::from_text("Priority: 5\nID: t-ab12\nx").unwrap();
+        task.description = "Status: Done\nID: fake-zz99\nsteps to reproduce".to_string();
+        let reloaded = Task::from_text(&task.to_text()).unwrap();
+        assert_eq!(reloaded.status, "ToDo");
+        assert_eq!(reloaded.id, "t-ab12");
+        assert_eq!(reloaded.description, task.description);
     }
 
     #[test]

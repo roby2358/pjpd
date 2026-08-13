@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{Map, Value, json};
 
-use crate::record::{parse_record, resolve_id, stamp, tag_from_id};
+use crate::record::{parse_record, push_description, resolve_id, stamp, tag_from_id};
 use crate::{ids, textrec};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -50,7 +50,8 @@ impl Idea {
         stamp(&mut self.created, &mut self.updated);
     }
 
-    /// Render back to on-disk record form.
+    /// Render back to on-disk record form: each property on its own line,
+    /// then a blank line, then the description.
     pub fn to_text(&self) -> String {
         let mut lines = vec![
             format!("Score: {:4}", self.score),
@@ -62,7 +63,7 @@ impl Idea {
         if let Some(updated) = &self.updated {
             lines.push(format!("Updated: {updated}"));
         }
-        lines.push(self.description.trim().to_string());
+        push_description(&mut lines, &self.description);
         lines.join("\n")
     }
 
@@ -208,5 +209,14 @@ mod tests {
     fn done_detection_uses_description_prefix() {
         let idea = Idea::from_text("Score: 5\nID: x-ab12\n(Done) finished").unwrap();
         assert!(idea.is_done());
+    }
+
+    #[test]
+    fn property_shaped_description_survives_write_and_reload() {
+        let mut idea = Idea::from_text("Score: 5\nID: x-ab12\nseed").unwrap();
+        idea.description = "Score: 9999\nrate everything higher".to_string();
+        let reloaded = Idea::from_text(&idea.to_text()).unwrap();
+        assert_eq!(reloaded.score, 5);
+        assert_eq!(reloaded.description, idea.description);
     }
 }
