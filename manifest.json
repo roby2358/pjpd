@@ -10,19 +10,12 @@
   },
   "icon": "icon.png",
   "server": {
-    "type": "python",
-    "entry_point": "pjpd.py",
+    "type": "binary",
+    "entry_point": "rust/target/release/pjpd",
     "mcp_config": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "\"${__dirname}\"",
-        "run",
-        "python",
-        "pjpd.py"
-      ],
-      "env": {
-      }
+      "command": "${__dirname}/rust/target/release/pjpd",
+      "args": [],
+      "env": {}
     }
   },
   "prompts_generated": true,
